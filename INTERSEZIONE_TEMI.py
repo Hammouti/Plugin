@@ -2,29 +2,41 @@ import tempfile
 from qgis.core import QgsApplication
 from processing.core.Processing import Processing
 
+error_list = []
 
 def converter(alg_name, *args):
-    params_dict = {}
     # get parameters list from alg_name
     # build params_dict by interleaving args and parameters
     alg = [a for a in QgsApplication.processingRegistry().algorithms() if alg_name[5:] in a.name()][0]
+    print("PARSING ALGORITHM", alg.name())
+
+    i = 0
     for param in alg.parameterDefinitions():
-        print(param.name())
-    return {'OUTPUT': 'foo'}
-    #return Processing.runAlgorithm(alg_name, params_dict, None)
+        try:
+            print(param.name(), args[i])
+        except Exception:
+            print(param.name(), "## MISSING ##")
+            error_list.append((alg_name, param.name()))
+        i += 1
+
+    #assert(len(args) == len(alg.parameterDefinitions()))
+
+    return {'OUTPUT': 'foo', 'OUTPUT_LAYER': 'bar', 'FAIL_OUTPUT': 'kivy'}
+    # return Processing.runAlgorithm(alg_name, params_dict, None)
 
 
-##INTERSEZIONE_TEMI=name
-##Vettore_intersezione_Censuarie_Hazard_OMI=vector
-##Tabella_costi_ricostruzione=table
-##Tabella_percentuale_danno=table
-##Piani_tot=output vector
-##A44=output vector
-##Area_primo_piano_minore_15=output vector
-##E1=output vector
-##Output_Danno_TOT=output vector
-##Area_minore_1000=output vector
-##Industriale=output vector
+INTERSEZIONE_TEMI = 'output_INTERSEZIONE_TEMI'
+Vettore_intersezione_Censuarie_Hazard_OMI = 'output_Vettore_intersezione_Censuarie_Hazard_OMI'
+Tabella_costi_ricostruzione = 'output_Tabella_costi_ricostruzione'
+Tabella_percentuale_danno = 'output_Tabella_percentuale_danno'
+Piani_tot = 'output_Piani_tot'
+A44 = 'output_A44'
+Area_primo_piano_minore_15 = 'output_Area_primo_piano_minore_15'
+E1 = 'output_E1'
+Output_Danno_TOT = 'output_Output_Danno_TOT'
+Area_minore_1000 = 'output_Area_minore_1000'
+Industriale = 'output_Industriale'
+
 outputs_QGISMULTIPARTTOSINGLEPARTS_1=converter('qgis:multiparttosingleparts', 'Vettore_intersezione_Censuarie_Hazard_OMI',None)
 outputs_QGISFIELDCALCULATOR_17=converter('qgis:fieldcalculator', outputs_QGISMULTIPARTTOSINGLEPARTS_1['OUTPUT'],'F_AREA',0,10.0,11.0,True,'$area',None)
 outputs_QGISFIELDCALCULATOR_18=converter('qgis:fieldcalculator', outputs_QGISFIELDCALCULATOR_17['OUTPUT_LAYER'],'AREA_PERC',0,10.0,6.0,False,'round(("F_AREA" / "AREA_OLD"),6)',None)
@@ -74,3 +86,7 @@ outputs_QGISFIELDCALCULATOR_13=converter('qgis:fieldcalculator', outputs_QGISFIE
 outputs_QGISFIELDCALCULATOR_14=converter('qgis:fieldcalculator', outputs_QGISFIELDCALCULATOR_13['OUTPUT_LAYER'],'E1_RIC_MAX',0,10.0,0.0,True,'"AREA_1P" * "COSTO_MAX" * "E3"',None)
 outputs_QGISFIELDCALCULATOR_15=converter('qgis:fieldcalculator', outputs_QGISFIELDCALCULATOR_14['OUTPUT_LAYER'],'ET_RIC_MIN',0,10.0,0.0,True,'"A44" * "COSTO_MIN"',None)
 outputs_QGISFIELDCALCULATOR_16=converter('qgis:fieldcalculator', outputs_QGISFIELDCALCULATOR_15['OUTPUT_LAYER'],'ET_RIC_MAX',0,10.0,0.0,True,'"A44" * "COSTO_MAX"',Output_Danno_TOT)
+
+
+for alg_name, param_name in error_list:
+    print(alg_name, param_name)
