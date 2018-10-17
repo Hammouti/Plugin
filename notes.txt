@@ -1,0 +1,17 @@
+myalg=[a for a in QgsApplication.processingRegistry().algorithms() if "multiparttosingleparts" in a.name()][0]
+
+for param in myalg.parameterDefinitions():
+    print(param.name())
+
+
+INPUT
+FIELD_NAME
+FIELD_TYPE
+FIELD_LENGTH
+FIELD_PRECISION
+GLOBAL
+FORMULA
+OUTPUT
+
+
+>>> exec(open('/Users/jack/mohammed/src/INTERSEZIONE_TEMI.py').read())
